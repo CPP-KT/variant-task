@@ -205,3 +205,25 @@ TEST(traits, converting_assigment) {
   ASSERT_FALSE(assigment5);
   ASSERT_FALSE(assigment6);
 }
+
+TEST(traits, variant_size) {
+  using variant1 = variant<int, std::string, variant<int, std::vector<int>, size_t>, bool>;
+  ASSERT_EQ(variant_size_v<variant1>, 4);
+  ASSERT_EQ(variant_size_v<variant1>, variant_size_v<const variant1>);
+  ASSERT_EQ(variant_size_v<variant1>, variant_size<variant1>::value);
+  ASSERT_EQ(variant_size_v<variant1>, variant_size<variant1>{});
+  ASSERT_EQ(variant_size_v<variant1>, variant_size<variant1>{}());
+}
+
+TEST(traits, variant_alternative) {
+  using variant1 = variant<int, std::string, variant<int, std::vector<int>, size_t>, bool>;
+  using T1 = variant_alternative_t<1, variant1>;
+  using T2 = typename variant_alternative<1, variant1>::type;
+  using T3 = variant_alternative_t<1, const variant1>;
+  bool res1 = std::is_same_v<T1, std::string>;
+  bool res2 = std::is_same_v<T1, T2>;
+  bool res3 = std::is_same_v<const T1, T3>;
+  ASSERT_TRUE(res1);
+  ASSERT_TRUE(res2);
+  ASSERT_TRUE(res3);
+}
