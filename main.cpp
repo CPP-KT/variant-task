@@ -272,34 +272,6 @@ constexpr bool direct_init_copy_ctor() {
 
 TEST(correctness, copy_ctor2) { ASSERT_TRUE(direct_init_copy_ctor()); }
 
-constexpr bool simple_move_ctor_test() {
-  {
-    variant<no_copy_assigment_t> x;
-    variant<no_copy_assigment_t> other{std::move(x)};
-    if (!holds_alternative<no_copy_assigment_t>(x) || !holds_alternative<no_copy_assigment_t>(other))
-      return false;
-  }
-
-  {
-    variant<int, double> x{42};
-    variant<int, double> y = std::move(x);
-    if (x.index() != y.index() || x.index() != 0 || get<0>(x) != get<0>(y))
-      return false;
-  }
-  return true;
-}
-
-static_assert(simple_move_ctor_test(), "Simple constexpr move test failed");
-
-TEST(corectness, move_ctor) {
-  simple_move_ctor_test();
-  constexpr auto test_str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-  variant<std::string> x(test_str);
-  variant<std::string> y = std::move(x);
-
-  ASSERT_TRUE(get<0>(x).length() == 0 && get<0>(y).length() == strlen(test_str));
-}
-
 struct only_movable {
   constexpr only_movable() = default;
 
@@ -360,6 +332,33 @@ struct coin_wrapper {
 private:
   int coin{1};
 };
+
+constexpr bool simple_move_ctor_test() {
+  {
+    variant<no_copy_assigment_t> x;
+    variant<no_copy_assigment_t> other{std::move(x)};
+    if (!holds_alternative<no_copy_assigment_t>(x) || !holds_alternative<no_copy_assigment_t>(other))
+      return false;
+  }
+  {
+    variant<int, double> x{42};
+    variant<int, double> y = std::move(x);
+    if (x.index() != y.index() || x.index() != 0 || get<0>(x) != get<0>(y))
+      return false;
+  }
+  return true;
+}
+
+static_assert(simple_move_ctor_test(), "Simple constexpr move test failed");
+
+TEST(corectness, move_ctor) {
+  simple_move_ctor_test();
+
+  variant<coin_wrapper> x;
+  variant<coin_wrapper> y = std::move(x);
+  ASSERT_TRUE(!get<0>(x).has_coins());
+  ASSERT_TRUE(get<0>(y).has_coins() == 1);
+}
 
 constexpr bool simple_value_move_ctor() {
   {
