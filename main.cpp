@@ -318,13 +318,13 @@ struct coin_wrapper {
     return *this;
   }
 
-  constexpr auto has_coins() noexcept { return coin; }
+  constexpr auto has_coins() const noexcept { return coin; }
 
   constexpr explicit coin_wrapper(yac_coin) noexcept : coin{17} {}
 
-  coin_wrapper(coin_wrapper const &other) : coin(other.coin + 1) {}
+  constexpr coin_wrapper(coin_wrapper const &other) noexcept : coin(other.coin + 1) {}
 
-  coin_wrapper &operator=(coin_wrapper const &other) {
+  constexpr coin_wrapper &operator=(coin_wrapper const &other) noexcept {
     coin = other.coin + 1;
     return *this;
   }
