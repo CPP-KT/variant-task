@@ -394,7 +394,8 @@ TEST(correctness, value_move_ctor) {
 constexpr bool in_place_ctor() {
   variant<bool, double> x1(in_place_type<double>, 42);
   variant<bool, double> x2(in_place_index<1>, 42);
-  return x1.index() == 1 && get<1>(x1) == 42.0 && x2.index() == 1 && get<1>(x2) == 42.0;
+  return (x1.index() == 1 && get<1>(x1) == 42.0)
+      && (x2.index() == 1 && get<1>(x2) == 42.0);
 }
 
 static_assert(in_place_ctor(), "Simple in-place ctor failed");
