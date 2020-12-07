@@ -307,13 +307,13 @@ struct coin_wrapper {
 
   constexpr coin_wrapper(coin_wrapper &&other) noexcept {
     assert(other.coin && "Move of moved value?");
-    coin = 1;
+    coin = other.coin;
     other.coin = 0;
   }
 
   constexpr coin_wrapper &operator=(coin_wrapper &&other) noexcept {
     assert(other.coin && "Move of moved value?");
-    coin = 1;
+    coin = other.coin;
     other.coin = 0;
     return *this;
   }
