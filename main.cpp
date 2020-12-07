@@ -343,7 +343,9 @@ constexpr bool simple_move_ctor_test() {
   {
     variant<int, double> x{42};
     variant<int, double> y = std::move(x);
-    if (x.index() != y.index() || x.index() != 0 || get<0>(x) != get<0>(y))
+    if (x.index() != y.index()
+     || x.index() != 0
+     || get<0>(x) != get<0>(y))
       return false;
   }
   return true;
