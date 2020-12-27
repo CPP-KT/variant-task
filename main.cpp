@@ -442,3 +442,26 @@ constexpr bool get_if_test_basic() {
 }
 
 static_assert(get_if_test_basic(), "Bad get_if behavior");
+
+TEST(correctness, multiple_same_types) {
+  variant<int, const int, int const, volatile int const> v;
+  v.emplace<int>(4);
+  ASSERT_TRUE(std::holds_alternative<int>(v));
+  ASSERT_TRUE(v.index() == 0);
+  ASSERT_TRUE(get_if<int>(&v));
+  ASSERT_TRUE(get_if<0>(&v));
+  ASSERT_TRUE(get<int>(v) == 4);
+  ASSERT_TRUE(get<0>(v) == 4);
+
+  v.emplace<1>(4);
+  ASSERT_TRUE(v.index() == 1);
+  ASSERT_TRUE(get_if<1>(&v));
+  ASSERT_TRUE(get<1>(v) == 4);
+
+  v.emplace<2>(4);
+  ASSERT_TRUE(v.index() == 2);
+  ASSERT_TRUE(get_if<2>(&v));
+  ASSERT_TRUE(get<2>(v) == 4);
+
+  ASSERT_THROW(get<1>(v), bad_variant_access);
+}
