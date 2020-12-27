@@ -434,4 +434,11 @@ TEST(correctness, variant_exceptions1) {
   }
 }
 
+constexpr bool get_if_test_basic() {
+  variant<float, double, long double> v = 4.5;
+  if (!get_if<double>(&v))
+    return false;
+  return true;
 }
+
+static_assert(get_if_test_basic(), "Bad get_if behavior");
