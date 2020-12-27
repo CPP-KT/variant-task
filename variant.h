@@ -16,3 +16,4 @@ using std::bad_variant_access;
 using std::in_place_index;
 using std::in_place_type;
 using std::visit;
+using std::variant_npos;

@@ -428,6 +428,7 @@ TEST(correctness, variant_exceptions1) {
     x.emplace<throwing_move_operator_t>(throwing_move_operator_t{});
   } catch (std::exception const &item) {
     ASSERT_TRUE(x.valueless_by_exception());
+    ASSERT_EQ(x.index(), variant_npos);
     ASSERT_THROW(get<0>(x), bad_variant_access);
     return;
   }
