@@ -6,6 +6,9 @@
 #include "variant.h"
 #include "gtest/gtest.h"
 
+template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
+template<class... Ts> overload(Ts...) -> overload<Ts...>;
+
 struct dummy_t {};
 
 struct no_default_t {
@@ -464,4 +467,41 @@ TEST(correctness, multiple_same_types) {
   ASSERT_THROW(get<1>(v), bad_variant_access);
 }
 
+TEST(visits, visit_valueless) {
+  variant<throwing_move_operator_t> x;
+  try {
+    x.emplace<throwing_move_operator_t>(throwing_move_operator_t{});
+  } catch (std::exception const &item) {
+    ASSERT_TRUE(x.valueless_by_exception());
+    auto visitor = [] (auto&& x) {  };
+    ASSERT_THROW(visit(visitor, x), bad_variant_access);
+    return;
+  }
+
+  assert(false && "Exception expected");
+}
+
+TEST(visits, visit_on_multiple) {
+  variant<int, const int, int const, double> v;
+  v.emplace<2>(42);
+  auto visitor = [] (auto x) -> int { return x; };
+  auto result = visit(visitor, v);
+  ASSERT_EQ(result, 42);
+
+  auto visitor2 = [] (int x) -> int { return x; };
+  result = visit(visitor, v);
+  ASSERT_EQ(result, 42);
+
+  auto visitor3 = [] (double const x) -> int { return x; };
+  result = visit(visitor, v);
+  ASSERT_EQ(result, 42);
+}
+
+TEST(visits, visit_overload) {
+  variant<char const*> v = "abce";
+  auto visitor = overload{
+      [] (std::string) -> bool { return false; },
+      [] (bool) -> bool { return true; }
+  };
+  ASSERT_TRUE(visit(visitor, v));
 }
