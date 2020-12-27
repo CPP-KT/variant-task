@@ -420,31 +420,18 @@ TEST(correctness, inplace_ctors) {
 }
 
 TEST(correctness, variant_exceptions1) {
-  using test_t = throwing_move_operator_t;
-  using var_t = variant<throwing_move_operator_t>;
-
   {
-    var_t x;
+    variant<throwing_move_operator_t> x;
     try {
-      x.emplace<test_t>(test_t{});
+      x.emplace<throwing_move_operator_t>(throwing_move_operator_t{});
     } catch (std::exception const &item) {
       ASSERT_TRUE(x.valueless_by_exception());
       ASSERT_THROW(get<0>(x), bad_variant_access);
+      return;
     }
-  }
 
-  {
-    var_t x;
-    try {
-      x = test_t{};
-    } catch (std::exception const &item) {
-      ASSERT_TRUE(x.valueless_by_exception());
-      ASSERT_THROW(get<0>(x), bad_variant_access);
-    }
+    assert(false && "Exception expected");
   }
 }
 
-TEST(correctness, variant_exceptions2) {
-  variant<int, double> x;
-  ASSERT_THROW(get<1>(x), bad_variant_access);
 }
