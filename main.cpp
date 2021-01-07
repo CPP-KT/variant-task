@@ -99,10 +99,10 @@ TEST(traits, in_place_index) {
   ASSERT_TRUE(construct6);
 }
 
-TEST(traits, copy_assigment) {
+TEST(traits, copy_assignment) {
   using variant1 = variant<std::string, double, no_copy_t>;
-  using variant2 = variant<std::vector<short>, int, no_copy_assigment_t>;
-  using variant3 = variant<dummy_t, int, non_trivial_copy_assigment_t>;
+  using variant2 = variant<std::vector<short>, int, no_copy_assignment_t>;
+  using variant3 = variant<dummy_t, int, non_trivial_copy_assignment_t>;
   using variant4 = variant<double, non_trivial_copy_t, bool>;
   using variant5 = variant<int, short, char, dummy_t, bool>;
   ASSERT_FALSE(std::is_copy_assignable_v<variant1>);
@@ -115,14 +115,14 @@ TEST(traits, copy_assigment) {
   ASSERT_TRUE(std::is_trivially_copy_assignable_v<variant5>);
 }
 
-TEST(traits, move_assigment) {
+TEST(traits, move_assignment) {
   using variant1 = variant<std::string, double, no_move_t>;
-  using variant2 = variant<int, std::vector<std::string>, no_move_assigment_t, bool>;
+  using variant2 = variant<int, std::vector<std::string>, no_move_assignment_t, bool>;
   using variant3 = variant<dummy_t, int, std::vector<double>>;
   using variant4 = variant<double, std::string, bool>;
   using variant5 = variant<int, short, char, dummy_t, bool>;
   using variant6 = variant<int, std::string, throwing_move_operator_t, double>;
-  using variant7 = variant<int, throwing_move_assigment_t, double>;
+  using variant7 = variant<int, throwing_move_assignment_t, double>;
   ASSERT_FALSE(std::is_move_assignable_v<variant1>);
   ASSERT_FALSE(std::is_move_assignable_v<variant2>);
   ASSERT_TRUE(std::is_move_assignable_v<variant3>);
@@ -140,20 +140,20 @@ TEST(traits, move_assigment) {
   ASSERT_TRUE(std::is_nothrow_move_assignable_v<variant5>);
 }
 
-TEST(traits, converting_assigment) {
+TEST(traits, converting_assignment) {
   using variant1 = variant<std::string, std::vector<char>, bool>;
-  bool assigment1 = std::is_assignable_v<variant1 &, std::string &&>;
-  bool assigment2 = std::is_assignable_v<variant1 &, const char *>;
-  bool assigment3 = std::is_assignable_v<variant1 &, size_t>;
-  bool assigment4 = std::is_nothrow_assignable_v<variant1 &, std::string &&>;
-  bool assigment5 = std::is_nothrow_assignable_v<variant1 &, const std::string &>;
-  bool assigment6 = std::is_assignable_v<variant1 &, double *>;
-  ASSERT_TRUE(assigment1);
-  ASSERT_TRUE(assigment2);
-  ASSERT_FALSE(assigment3);
-  ASSERT_TRUE(assigment4);
-  ASSERT_FALSE(assigment5);
-  ASSERT_FALSE(assigment6);
+  bool assignment1 = std::is_assignable_v<variant1 &, std::string &&>;
+  bool assignment2 = std::is_assignable_v<variant1 &, const char *>;
+  bool assignment3 = std::is_assignable_v<variant1 &, size_t>;
+  bool assignment4 = std::is_nothrow_assignable_v<variant1 &, std::string &&>;
+  bool assignment5 = std::is_nothrow_assignable_v<variant1 &, const std::string &>;
+  bool assignment6 = std::is_assignable_v<variant1 &, double *>;
+  ASSERT_TRUE(assignment1);
+  ASSERT_TRUE(assignment2);
+  ASSERT_FALSE(assignment3);
+  ASSERT_TRUE(assignment4);
+  ASSERT_FALSE(assignment5);
+  ASSERT_FALSE(assignment6);
 }
 
 TEST(traits, variant_size) {
@@ -206,9 +206,9 @@ static_assert(simple_copy_ctor_test(), "Basic constexpr copy-constructor failed"
 TEST(correctness, copy_ctor1) { ASSERT_TRUE(simple_copy_ctor_test()); }
 
 constexpr bool direct_init_copy_ctor() {
-  variant<no_copy_assigment_t> x;
-  variant<no_copy_assigment_t> other{x};
-  if (!holds_alternative<no_copy_assigment_t>(x) || !holds_alternative<no_copy_assigment_t>(other))
+  variant<no_copy_assignment_t> x;
+  variant<no_copy_assignment_t> other{x};
+  if (!holds_alternative<no_copy_assignment_t>(x) || !holds_alternative<no_copy_assignment_t>(other))
     return false;
   return true;
 }
@@ -217,9 +217,9 @@ TEST(correctness, copy_ctor2) { ASSERT_TRUE(direct_init_copy_ctor()); }
 
 constexpr bool simple_move_ctor_test() {
   {
-    variant<no_copy_assigment_t> x;
-    variant<no_copy_assigment_t> other{std::move(x)};
-    if (!holds_alternative<no_copy_assigment_t>(x) || !holds_alternative<no_copy_assigment_t>(other))
+    variant<no_copy_assignment_t> x;
+    variant<no_copy_assignment_t> other{std::move(x)};
+    if (!holds_alternative<no_copy_assignment_t>(x) || !holds_alternative<no_copy_assignment_t>(other))
       return false;
   }
   {
@@ -390,16 +390,14 @@ TEST(swap, valueless) {
   using V = variant<int, throwing_move_operator_t>;
   V a = 14;
   V b = 88;
-  try {
+  ASSERT_ANY_THROW({
     V tmp(in_place_index<1>);
     a = std::move(tmp);
-  } catch (...) {
-  }
-  try {
+  });
+  ASSERT_ANY_THROW({
     V tmp(in_place_index<1>);
     b = std::move(tmp);
-  } catch (...) {
-  }
+  });
   ASSERT_TRUE(a.valueless_by_exception());
   ASSERT_TRUE(b.valueless_by_exception());
   a.swap(b);
@@ -427,4 +425,54 @@ TEST(swap, different_alternatives) {
   ASSERT_TRUE(holds_alternative<int>(c));
   ASSERT_EQ(get<std::string>(a), "kek");
   ASSERT_EQ(get<int>(c), 42);
+}
+
+TEST(assignment, same_alternative) {
+  using V = variant<non_trivial_int_wrapper_t, non_trivial_copy_assignment_t>;
+  V a(in_place_type<non_trivial_copy_assignment_t>, 42);
+  V b(in_place_type<non_trivial_copy_assignment_t>, 14882);
+  a = b;
+  ASSERT_EQ(get<1>(a).x, 14882 + 5);
+}
+
+TEST(assignment, back_and_forth) {
+  using V = variant<non_trivial_int_wrapper_t, non_trivial_copy_assignment_t>;
+  V a = non_trivial_int_wrapper_t(42);
+  V b = non_trivial_copy_assignment_t(14882);
+  ASSERT_EQ(get<0>(a).x, 42);
+  a = 42;
+  ASSERT_EQ(get<0>(a).x, 43);
+  a = non_trivial_copy_assignment_t(42);
+  ASSERT_EQ(get<1>(a).x, 42);
+  b = a;
+  ASSERT_EQ(get<1>(b).x, 47);
+  a = b;
+  ASSERT_EQ(get<1>(a).x, 52);
+}
+
+TEST(assignment, move_only) {
+  only_movable::move_assignment_called = 0;
+  using V = variant<only_movable>;
+  V a(in_place_type<only_movable>);
+  V b(in_place_type<only_movable>);
+  a = std::move(b);
+  ASSERT_TRUE(get<0>(a).has_coin());
+  ASSERT_FALSE(get<0>(b).has_coin());
+  ASSERT_EQ(only_movable::move_assignment_called, 1);
+}
+
+TEST(assignment, different_alternatives) {
+  using V = variant<std::vector<int>, std::vector<double>>;
+  V a = std::vector{13.37, 2020.02};
+  V b = std::vector{1337, 14882};
+  a = b;
+  ASSERT_TRUE(holds_alternative<std::vector<int>>(a));
+}
+
+TEST(constructor, move_only) {
+  using V = variant<only_movable>;
+  V a(in_place_type<only_movable>);
+  V b(std::move(a));
+  ASSERT_TRUE(get<0>(b).has_coin());
+  ASSERT_FALSE(get<0>(a).has_coin());
 }

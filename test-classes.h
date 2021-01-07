@@ -37,15 +37,17 @@ struct no_move_t {
 };
 
 struct non_trivial_copy_t {
+  explicit non_trivial_copy_t(int x) noexcept : x{x} {}
   non_trivial_copy_t(const non_trivial_copy_t &other) noexcept : x{other.x + 1} {}
 
   int x;
 };
 
-struct non_trivial_copy_assigment_t {
-  non_trivial_copy_assigment_t &operator=(const non_trivial_copy_assigment_t &other) {
+struct non_trivial_copy_assignment_t {
+  explicit non_trivial_copy_assignment_t(int x) noexcept : x{x} {}
+  non_trivial_copy_assignment_t &operator=(const non_trivial_copy_assignment_t &other) {
     if (this != &other) {
-      x = other.x + 1;
+      x = other.x + 5;
     }
     return *this;
   };
@@ -53,17 +55,26 @@ struct non_trivial_copy_assigment_t {
   int x;
 };
 
-struct no_move_assigment_t {
-  no_move_assigment_t &operator=(no_move_assigment_t &&) = delete;
+struct non_trivial_int_wrapper_t {
+  non_trivial_int_wrapper_t(int x) : x{x} {}
+  non_trivial_int_wrapper_t &operator=(int i) {
+    x = i + 1;
+    return *this;
+  }
+  int x;
 };
 
-struct no_copy_assigment_t {
-  no_copy_assigment_t &operator=(const no_copy_assigment_t &) = delete;
+struct no_move_assignment_t {
+  no_move_assignment_t &operator=(no_move_assignment_t &&) = delete;
 };
 
-struct throwing_move_assigment_t {
-  throwing_move_assigment_t(throwing_move_assigment_t &&) = default;
-  throwing_move_assigment_t &operator=(throwing_move_assigment_t &&) noexcept(false) { throw std::exception(); }
+struct no_copy_assignment_t {
+  no_copy_assignment_t &operator=(const no_copy_assignment_t &) = delete;
+};
+
+struct throwing_move_assignment_t {
+  throwing_move_assignment_t(throwing_move_assignment_t &&) = default;
+  throwing_move_assignment_t &operator=(throwing_move_assignment_t &&) noexcept(false) { throw std::exception(); }
 };
 
 struct throwing_copy_operator_t {
@@ -73,6 +84,8 @@ struct throwing_copy_operator_t {
 };
 
 struct only_movable {
+  static inline size_t move_assignment_called = 0;
+
   constexpr only_movable() = default;
 
   constexpr only_movable(only_movable &&other) noexcept {
@@ -83,6 +96,7 @@ struct only_movable {
 
   constexpr only_movable &operator=(only_movable &&other) noexcept {
     if (this != &other) {
+      move_assignment_called += 1;
       assert(other.coin && "Move of moved value?");
       coin = true;
       other.coin = false;
