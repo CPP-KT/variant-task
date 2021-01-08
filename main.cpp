@@ -272,6 +272,8 @@ TEST(correctness, value_move_ctor) {
     // See NB in #4 https://en.cppreference.com/w/cpp/utility/variant/variant
     variant<bool, std::string> v("asdasd");
     ASSERT_TRUE(v.index() == 1); // Overload resolution is not your friend anymore
+    variant<float, long, double> z = 0;
+    ASSERT_TRUE(z.index() == 1);
   }
 }
 
