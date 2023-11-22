@@ -371,6 +371,20 @@ TEST(correctness, visit) {
   ASSERT_TRUE(was_called);
 }
 
+TEST(correctness, get) {
+  variant<int, long, double> v(in_place_index<0>, 42);
+
+  ASSERT_EQ(get<0>(v), 42);
+  ASSERT_EQ(get<0>(std::as_const(v)), 42);
+  ASSERT_EQ(get<0>(std::move(v)), 42);
+  ASSERT_EQ(get<0>(std::move(std::as_const(v))), 42);
+
+  ASSERT_EQ(get<int>(v), 42);
+  ASSERT_EQ(get<int>(std::as_const(v)), 42);
+  ASSERT_EQ(get<int>(std::move(v)), 42);
+  ASSERT_EQ(get<int>(std::move(std::as_const(v))), 42);
+}
+
 TEST(correctness, emplace) {
   using V = variant<std::vector<int>, std::string>;
   std::string s = "A fairly long string that will cause an allocation";
