@@ -941,6 +941,70 @@ TEST(constructor, ctad) {
   ASSERT_TRUE((std::is_same_v<decltype(c), V>));
 }
 
+TEST(constructor, converting_ctor) {
+  using V = variant<int, long>;
+  int i1 = 10;
+  const int ci1 = 9;
+  int i2 = 7;
+  const int ci2 = 6;
+
+  V v1 = 11;
+  V v2 = i1;
+  V v3 = ci1;
+  V v4 = std::move(i1);
+  V v5 = std::move(ci1);
+
+  EXPECT_EQ(get<0>(v1), 11);
+  EXPECT_EQ(get<0>(v2), 10);
+  EXPECT_EQ(get<0>(v3), 9);
+  EXPECT_EQ(get<0>(v4), 10);
+  EXPECT_EQ(get<0>(v5), 9);
+
+  v1 = 8;
+  v2 = i2;
+  v3 = ci2;
+  v4 = std::move(i2);
+  v5 = std::move(ci2);
+
+  EXPECT_EQ(get<0>(v1), 8);
+  EXPECT_EQ(get<0>(v2), 7);
+  EXPECT_EQ(get<0>(v3), 6);
+  EXPECT_EQ(get<0>(v4), 7);
+  EXPECT_EQ(get<0>(v5), 6);
+}
+
+TEST(constructor, converting_ctor_const) {
+  using V = variant<const int, long>;
+  int i1 = 10;
+  const int ci1 = 9;
+  long l2 = 7;
+  const long cl2 = 6;
+
+  V v1 = 11;
+  V v2 = i1;
+  V v3 = ci1;
+  V v4 = std::move(i1);
+  V v5 = std::move(ci1);
+
+  EXPECT_EQ(get<0>(v1), 11);
+  EXPECT_EQ(get<0>(v2), 10);
+  EXPECT_EQ(get<0>(v3), 9);
+  EXPECT_EQ(get<0>(v4), 10);
+  EXPECT_EQ(get<0>(v5), 9);
+
+  v1 = 8l;
+  v2 = l2;
+  v3 = cl2;
+  v4 = std::move(l2);
+  v5 = std::move(cl2);
+
+  EXPECT_EQ(get<1>(v1), 8);
+  EXPECT_EQ(get<1>(v2), 7);
+  EXPECT_EQ(get<1>(v3), 6);
+  EXPECT_EQ(get<1>(v4), 7);
+  EXPECT_EQ(get<1>(v5), 6);
+}
+
 template <typename Var>
 static constexpr bool test_equal(const Var& l, const Var& r, bool expect_equal) {
   return ((l == r) == expect_equal) && (!(l != r) == expect_equal) && ((r == l) == expect_equal) &&
