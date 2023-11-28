@@ -243,6 +243,13 @@ TEST(correctness, copy_ctor2) {
   ASSERT_TRUE(direct_init_copy_ctor());
 }
 
+TEST(correctness, destructor) {
+  {
+    variant<non_trivially_destructible_t> v;
+  }
+  ASSERT_EQ(non_trivially_destructible_t::destructor_count, 1);
+}
+
 static constexpr bool simple_move_ctor_test() {
   {
     variant<no_copy_assignment_t> x;
@@ -939,6 +946,55 @@ TEST(constructor, ctad) {
   variant c = variant(a);
   ASSERT_TRUE((std::is_same_v<decltype(b), V>));
   ASSERT_TRUE((std::is_same_v<decltype(c), V>));
+}
+
+TEST(destructor, emplace) {
+  non_trivially_destructible_t::reset_counters();
+  {
+    variant<non_trivially_destructible_t, int> v;
+    int x = 2;
+    v.emplace<1>(x);
+    ASSERT_EQ(non_trivially_destructible_t::destructor_count, 1);
+  }
+  {
+    variant<non_trivially_destructible_t, int> v;
+    int x = 2;
+    v.emplace<int>(x);
+    ASSERT_EQ(non_trivially_destructible_t::destructor_count, 2);
+  }
+}
+
+TEST(destructor, copy_assignment) {
+  non_trivially_destructible_t::reset_counters();
+  variant<non_trivially_destructible_t, int> v;
+  variant<non_trivially_destructible_t, int> u = 2;
+  v = u;
+  ASSERT_EQ(non_trivially_destructible_t::destructor_count, 1);
+}
+
+TEST(destructor, move_assignment) {
+  non_trivially_destructible_t::reset_counters();
+  variant<non_trivially_destructible_t, int> v;
+  v = variant<non_trivially_destructible_t, int>(2);
+  ASSERT_EQ(non_trivially_destructible_t::destructor_count, 1);
+}
+
+TEST(destructor, converting_assignment) {
+  non_trivially_destructible_t::reset_counters();
+  variant<non_trivially_destructible_t, int> v;
+  v = 2;
+  ASSERT_EQ(non_trivially_destructible_t::destructor_count, 1);
+}
+
+TEST(destructor, repeating_types) {
+  non_trivially_destructible_t::reset_counters();
+  {
+    variant<non_trivially_destructible_t, non_trivially_destructible_t, non_trivially_destructible_t> v;
+    v.emplace<1>(non_trivially_destructible_t{});
+    v.emplace<2>(non_trivially_destructible_t{});
+    v.emplace<0>(non_trivially_destructible_t{});
+  }
+  ASSERT_EQ(non_trivially_destructible_t::destructor_count, 7);
 }
 
 template <typename Var>
