@@ -169,6 +169,19 @@ TEST(traits, converting_assignment) {
   ASSERT_FALSE(assignment6);
 }
 
+TEST(traits, swap) {
+
+  using variant_nothrow_swap = variant<int, bool>;
+  using variant_throwing_swap = variant<throwing_swap_t, long>;
+  using variant_non_swappable = variant<int, non_swappable_t>;
+  using variant_non_move_assignable = variant<move_but_no_move_assignment_t, int>;
+
+  ASSERT_FALSE(std::is_swappable_v<variant_non_swappable>);
+  ASSERT_TRUE(std::is_nothrow_swappable_v<variant_nothrow_swap>);
+  ASSERT_TRUE(std::is_nothrow_swappable_v<variant_non_move_assignable>);
+  ASSERT_FALSE(std::is_nothrow_swappable_v<variant_throwing_swap>);
+}
+
 TEST(traits, variant_size) {
   using variant1 = variant<int, std::string, variant<int, std::vector<int>, size_t>, bool>;
   ASSERT_EQ(variant_size_v<variant1>, 4);
@@ -687,6 +700,22 @@ TEST(swap, different_alternatives) {
   ASSERT_TRUE(holds_alternative<int>(c));
   ASSERT_EQ(get<std::string>(a), "kek");
   ASSERT_EQ(get<int>(c), 42);
+}
+
+TEST(swap, swap_no_move_assigment) {
+  using V = variant<move_but_no_move_assignment_t, long>;
+
+  V v1 = 10l;
+  V v2 = move_but_no_move_assignment_t(5);
+  V v3 = move_but_no_move_assignment_t(6);
+  swap(v1, v2);
+  ASSERT_TRUE(holds_alternative<move_but_no_move_assignment_t>(v1));
+  ASSERT_TRUE(holds_alternative<long>(v2));
+  ASSERT_EQ(get<move_but_no_move_assignment_t>(v1).x, 5);
+  ASSERT_EQ(get<long>(v2), 10);
+  swap(v1, v3);
+  ASSERT_EQ(get<move_but_no_move_assignment_t>(v1).x, 6);
+  ASSERT_EQ(get<move_but_no_move_assignment_t>(v3).x, 5);
 }
 
 TEST(assignment, same_alternative) {
