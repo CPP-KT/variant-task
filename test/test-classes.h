@@ -26,7 +26,7 @@ struct throwing_default_t {
 
 struct throwing_swap_t {
   friend void swap(throwing_swap_t&, throwing_swap_t&) {
-    throw std::exception();q
+    throw std::exception();
   }
 };
 
@@ -67,7 +67,6 @@ struct non_trivial_copy_t {
 };
 
 struct move_but_no_move_assignment_t {
-  int x;
   move_but_no_move_assignment_t() = default;
 
   move_but_no_move_assignment_t(move_but_no_move_assignment_t&& other) noexcept : x(other.x) {}
@@ -81,6 +80,8 @@ struct move_but_no_move_assignment_t {
   friend void swap(move_but_no_move_assignment_t& lhs, move_but_no_move_assignment_t& rhs) noexcept {
     std::swap(lhs.x, rhs.x);
   }
+
+  int x;
 };
 
 struct non_trivial_copy_assignment_t {

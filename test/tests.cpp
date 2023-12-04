@@ -705,7 +705,7 @@ TEST(swap, different_alternatives) {
 TEST(swap, swap_no_move_assigment) {
   using V = variant<move_but_no_move_assignment_t, long>;
 
-  V v1 = 10l;
+  V v1 = 10L;
   V v2 = move_but_no_move_assignment_t(5);
   V v3 = move_but_no_move_assignment_t(6);
   swap(v1, v2);
@@ -763,6 +763,54 @@ TEST(assignment, different_alternatives) {
   V b = std::vector{1337, 14882};
   a = b;
   ASSERT_TRUE(holds_alternative<std::vector<int>>(a));
+}
+
+TEST(assignment, converting_assignment_same) {
+  using V = variant<int, long>;
+  int i2 = 7;
+  const int ci2 = 6;
+
+  V v1 = 11;
+  V v2 = v1;
+  V v3 = v1;
+  V v4 = v1;
+  V v5 = v1;
+
+  v1 = 8;
+  v2 = i2;
+  v3 = ci2;
+  v4 = std::move(i2);
+  v5 = std::move(ci2);
+
+  EXPECT_EQ(get<0>(v1), 8);
+  EXPECT_EQ(get<0>(v2), 7);
+  EXPECT_EQ(get<0>(v3), 6);
+  EXPECT_EQ(get<0>(v4), 7);
+  EXPECT_EQ(get<0>(v5), 6);
+}
+
+TEST(assignment, converting_assignment_different) {
+  using V = variant<const int, long>;
+  long l2 = 7;
+  const long cl2 = 6;
+
+  V v1 = 11;
+  V v2 = v1;
+  V v3 = v1;
+  V v4 = v1;
+  V v5 = v1;
+
+  v1 = 8L;
+  v2 = l2;
+  v3 = cl2;
+  v4 = std::move(l2);
+  v5 = std::move(cl2);
+
+  EXPECT_EQ(get<1>(v1), 8);
+  EXPECT_EQ(get<1>(v2), 7);
+  EXPECT_EQ(get<1>(v3), 6);
+  EXPECT_EQ(get<1>(v4), 7);
+  EXPECT_EQ(get<1>(v5), 6);
 }
 
 TEST(valueless_by_exception, copy_assign_nothrow) {
@@ -974,8 +1022,6 @@ TEST(constructor, converting_ctor) {
   using V = variant<int, long>;
   int i1 = 10;
   const int ci1 = 9;
-  int i2 = 7;
-  const int ci2 = 6;
 
   V v1 = 11;
   V v2 = i1;
@@ -988,26 +1034,12 @@ TEST(constructor, converting_ctor) {
   EXPECT_EQ(get<0>(v3), 9);
   EXPECT_EQ(get<0>(v4), 10);
   EXPECT_EQ(get<0>(v5), 9);
-
-  v1 = 8;
-  v2 = i2;
-  v3 = ci2;
-  v4 = std::move(i2);
-  v5 = std::move(ci2);
-
-  EXPECT_EQ(get<0>(v1), 8);
-  EXPECT_EQ(get<0>(v2), 7);
-  EXPECT_EQ(get<0>(v3), 6);
-  EXPECT_EQ(get<0>(v4), 7);
-  EXPECT_EQ(get<0>(v5), 6);
 }
 
 TEST(constructor, converting_ctor_const) {
   using V = variant<const int, long>;
   int i1 = 10;
   const int ci1 = 9;
-  long l2 = 7;
-  const long cl2 = 6;
 
   V v1 = 11;
   V v2 = i1;
@@ -1020,18 +1052,6 @@ TEST(constructor, converting_ctor_const) {
   EXPECT_EQ(get<0>(v3), 9);
   EXPECT_EQ(get<0>(v4), 10);
   EXPECT_EQ(get<0>(v5), 9);
-
-  v1 = 8l;
-  v2 = l2;
-  v3 = cl2;
-  v4 = std::move(l2);
-  v5 = std::move(cl2);
-
-  EXPECT_EQ(get<1>(v1), 8);
-  EXPECT_EQ(get<1>(v2), 7);
-  EXPECT_EQ(get<1>(v3), 6);
-  EXPECT_EQ(get<1>(v4), 7);
-  EXPECT_EQ(get<1>(v5), 6);
 }
 
 template <typename Var>
