@@ -765,7 +765,7 @@ TEST(assignment, different_alternatives) {
   ASSERT_TRUE(holds_alternative<std::vector<int>>(a));
 }
 
-TEST(assignment, converting_assignment_same) {
+TEST(assignment, converting_assignment2) {
   using V = variant<int, long>;
   int i2 = 7;
   const int ci2 = 6;
@@ -789,7 +789,7 @@ TEST(assignment, converting_assignment_same) {
   EXPECT_EQ(get<0>(v5), 6);
 }
 
-TEST(assignment, converting_assignment_different) {
+TEST(assignment, converting_assignment2_const) {
   using V = variant<const int, long>;
   long l2 = 7;
   const long cl2 = 6;
