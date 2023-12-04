@@ -968,7 +968,7 @@ TEST(destructor, copy_assignment) {
   non_trivially_destructible_t::reset_counters();
   {
     variant<non_trivially_destructible_t, int> v;
-    variant<non_trivially_destructible_t, int> u = 2;
+    variant<non_trivially_destructible_t, int> u = 14882;
     v = u;
   }
   ASSERT_EQ(non_trivially_destructible_t::destructor_count, 1);
@@ -978,7 +978,7 @@ TEST(destructor, move_assignment) {
   non_trivially_destructible_t::reset_counters();
   {
     variant<non_trivially_destructible_t, int> v;
-    v = variant<non_trivially_destructible_t, int>(2);
+    v = variant<non_trivially_destructible_t, int>(14882);
   }
   ASSERT_EQ(non_trivially_destructible_t::destructor_count, 1);
 }
@@ -987,7 +987,7 @@ TEST(destructor, converting_assignment) {
   non_trivially_destructible_t::reset_counters();
   {
     variant<non_trivially_destructible_t, int> v;
-    v = 2;
+    v = 14882;
   }
   ASSERT_EQ(non_trivially_destructible_t::destructor_count, 1);
 }
