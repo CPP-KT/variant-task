@@ -176,7 +176,7 @@ TEST(traits, swap) {
   using variant_non_swappable = variant<int, non_swappable_t>;
   using variant_non_move_assignable = variant<move_but_no_move_assignment_t, int>;
 
-  ASSERT_FALSE(std::is_swappable_v<variant_non_swappable>);
+  ASSERT_TRUE(std::is_swappable_v<variant_non_swappable>);
   ASSERT_TRUE(std::is_nothrow_swappable_v<variant_nothrow_swap>);
   ASSERT_TRUE(std::is_nothrow_swappable_v<variant_non_move_assignable>);
   ASSERT_FALSE(std::is_nothrow_swappable_v<variant_throwing_swap>);

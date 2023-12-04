@@ -25,8 +25,8 @@ struct throwing_default_t {
 };
 
 struct throwing_swap_t {
-  friend void swap(throwing_swap_t& lhs, throwing_swap_t& rhs) {
-    throw std::exception();
+  friend void swap(throwing_swap_t&, throwing_swap_t&) {
+    throw std::exception();q
   }
 };
 
