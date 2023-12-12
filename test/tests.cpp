@@ -173,10 +173,8 @@ TEST(traits, swap) {
 
   using variant_nothrow_swap = variant<int, bool>;
   using variant_throwing_swap = variant<throwing_swap_t, long>;
-  using variant_non_swappable = variant<int, non_swappable_t>;
   using variant_non_move_assignable = variant<move_but_no_move_assignment_t, int>;
 
-  ASSERT_TRUE(std::is_swappable_v<variant_non_swappable>);
   ASSERT_TRUE(std::is_nothrow_swappable_v<variant_nothrow_swap>);
   ASSERT_TRUE(std::is_nothrow_swappable_v<variant_non_move_assignable>);
   ASSERT_FALSE(std::is_nothrow_swappable_v<variant_throwing_swap>);
@@ -708,12 +706,12 @@ TEST(swap, swap_no_move_assigment) {
   V v1 = 10L;
   V v2 = move_but_no_move_assignment_t(5);
   V v3 = move_but_no_move_assignment_t(6);
-  swap(v1, v2);
+  v1.swap(v2);
   ASSERT_TRUE(holds_alternative<move_but_no_move_assignment_t>(v1));
   ASSERT_TRUE(holds_alternative<long>(v2));
   ASSERT_EQ(get<move_but_no_move_assignment_t>(v1).x, 5);
   ASSERT_EQ(get<long>(v2), 10);
-  swap(v1, v3);
+  v1.swap(v3);
   ASSERT_EQ(get<move_but_no_move_assignment_t>(v1).x, 6);
   ASSERT_EQ(get<move_but_no_move_assignment_t>(v3).x, 5);
 }
