@@ -471,6 +471,12 @@ TEST(correctness, variant_exceptions1) {
     ASSERT_EQ(x.index(), variant_npos);
     ASSERT_THROW(get<0>(x), bad_variant_access);
     ASSERT_THROW(get<0>(x), std::exception);
+    try {
+      get<0>(x);
+    } catch (const std::exception& e) {
+      std::exception basic_exception;
+      EXPECT_NE(basic_exception.what(), e.what());
+    }
     return;
   }
   FAIL();
@@ -570,6 +576,12 @@ TEST(visits, visit_valueless) {
     auto visitor = [](auto&&) {};
     ASSERT_THROW(visit(visitor, x), bad_variant_access);
     ASSERT_THROW(visit(visitor, x), std::exception);
+    try {
+      visit(visitor, x);
+    } catch (const std::exception& e) {
+      std::exception basic_exception;
+      EXPECT_NE(basic_exception.what(), e.what());
+    }
     return;
   }
 
