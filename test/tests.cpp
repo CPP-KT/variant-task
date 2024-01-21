@@ -219,6 +219,7 @@ TEST(correctness, const_types_copy) {
 
 struct strange_non_trivial_move {
   explicit strange_non_trivial_move(int x) : x(x) {}
+
   strange_non_trivial_move(const strange_non_trivial_move&& other) : x(other.x + 1) {}
 
   int x;
