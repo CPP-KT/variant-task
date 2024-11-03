@@ -170,7 +170,6 @@ TEST(traits, converting_assignment) {
 }
 
 TEST(traits, swap) {
-
   using variant_nothrow_swap = variant<int, bool>;
   using variant_throwing_swap = variant<throwing_swap_t, long>;
   using variant_non_move_assignable = variant<move_but_no_move_assignment_t, int>;
